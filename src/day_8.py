@@ -30,55 +30,52 @@ def part_one(instructions):
 
 
 def part_two(instructions):
+
     acc = 0
     pc = 0
     visited = []
     program = []
 
     for instruction in instructions:
-        program.append([instruction[0:3], int(instruction[3:])])
+        instruction = instruction.split(' ')
+        instruction[1] = int(instruction[1])
+        program.append(instruction)
 
-    while pc < len(program):
-        instruction = program[pc]
-        # print(f"Executing {program[pc]} line {pc + 1}")
+    # print(program)
 
-        if instruction[0] == 'acc':
-            acc += instruction[1]
-            pc += 1
-        elif instruction[0] == 'jmp':
-            pc += instruction[1]
-        else:
-            pc += 1
+    for i, line in enumerate(program):
+            prev = program[i]
+            program[i] = flip(program[i])
 
-        if pc in visited:
-            print(f"Modifying {program[visited[-1]][0]} {program[visited[-1]][1]} line {visited[-1] + 1}")
-            if program[visited[-1]][0] == 'jmp':
-                program[visited[-1]][0] = 'nop'
-            elif program[visited[-1]][0] == 'nop':
-                program[visited[-1]][0] = 'jmp'
+            while pc < len(program):
+                instruction = program[pc]
 
-            acc = 0
-            pc = 0
-            visited = []
+                # print(f"Executing {program[pc]} line {pc + 1}")
 
-        else:
-            visited.append(pc)
+                if instruction[0] == 'acc':
+                    acc += instruction[1]
+                    pc += 1
+                elif instruction[0] == 'jmp':
+                    pc += instruction[1]
+                else:
+                    pc += 1
 
-    return acc
+                if pc in visited:
+                    acc = 0
+                    pc = 0
+                    visited = []
+                    break
+                else:
+                    visited.append(pc)
+
+                if pc >= len(program):
+                    return acc
+
+            program[i] = prev
 
 
 def flip(val):
     return 'jmp' if val == 'nop' else 'nop'
-
-
-def change_piece(lines):
-    for idx, turn in enumerate(lines):
-        if turn[0] == 'nop' or turn[0] == 'jmp':
-            prev = turn[0]
-            lines[idx][0] = flip(turn[0])
-            if accumulator := part_one(lines):
-                return accumulator
-            lines[idx][0] = prev
 
 
 if __name__ == '__main__':
