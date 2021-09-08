@@ -4,6 +4,29 @@
 
 
 from math import inf
+from time import perf_counter
+from functools import reduce
+
+
+def chinese_remainder(n, a):
+    sum = 0
+    prod = reduce(lambda a, b: a * b, n)
+    for n_i, a_i in zip(n, a):
+        p = prod // n_i
+        sum += a_i * mul_inv(p, n_i) * p
+    return sum % prod
+
+
+def mul_inv(a, b):
+    b0 = b
+    x0, x1 = 0, 1
+    if b == 1: return 1
+    while a > 1:
+        q = a // b
+        a, b = b, a % b
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0: x1 += b0
+    return x1
 
 
 def part_one():
@@ -33,40 +56,64 @@ def part_one():
 
 
 def part_two():
-    with open('../inputs/day13.txt') as f:
+    with open('../inputs/day13_test.txt') as f:
         lines = f.read().split()
 
     bus_ids = lines[1].split(',')
     indexes = []
-    temp_list = []
+    tmp = []
+
+    # print(bus_ids)
 
     for i, bus_id in enumerate(bus_ids):
         if bus_id != 'x':
             indexes.append(i)
-            temp_list.append(int(bus_id))
-    bus_ids = temp_list
+            tmp.append(int(bus_id))
+
+    bus_ids = tmp
 
     # print(bus_ids, indexes)
 
     found = False
-    result = 0
     counter = 0
+    time_stamp = 0
 
     while not found:
-        time_stamps = []
-        for i in range(0, len(bus_ids)):
-            time_stamps.append(bus_ids[i] * counter)
+        #time_stamp += bus_ids[0]
+        time_stamp = bus_ids[0] * counter
+        # print(time_stamp)
+        for i in range(1, len(bus_ids)):
             # print(time_stamps[i])
-            if len(time_stamps) > 1 and (time_stamps[0] + indexes[i]) % bus_ids[i] != 0:
+            if (time_stamp + indexes[i]) % bus_ids[i] != 0:
                 found = False
                 break
             else:
                 found = True
-        result = time_stamps[0]
+        # print(time_stamps)
         counter += 1
-        print(time_stamps)
+    return time_stamp
 
-    return result
+
+def part_two_optimized():
+    with open('../inputs/day13.txt') as f:
+        lines = f.read().split()
+
+    bus_ids = lines[1].split(',')
+    # indexes = []
+    tmp = []
+    offsets = [int(b) - i for i, b in enumerate(bus_ids) if b != "x"]
+    # print(offsets)
+    # print(len(bus_ids))
+    # print(bus_ids)
+
+    for i, bus_id in enumerate(bus_ids):
+        if bus_id != 'x':
+            # indexes.append(i)
+            tmp.append(int(bus_id))
+
+    bus_ids = tmp
+
+    return chinese_remainder(bus_ids, offsets)
 
 
 if __name__ == '__main__':
@@ -80,5 +127,20 @@ if __name__ == '__main__':
     print(rest)
     print(next_departure)
     """
-    # print(part_one())
-    print(part_two())
+    """
+    start = perf_counter()
+    for i in range(0, 10):
+        # print(part_one())
+        print(part_two())
+
+    end = perf_counter()
+    print(f'Execution time part_two(): {end - start}ns')
+    """
+    print(part_one())
+
+    start = perf_counter()
+
+    print(part_two_optimized())
+
+    end = perf_counter()
+    print(f'Execution time part_two_optimized(): {end - start}s')
