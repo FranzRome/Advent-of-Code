@@ -1,3 +1,5 @@
+import os
+
 def read_file(path):
     with open(path, 'r') as f:
         return f.read().splitlines()
@@ -20,6 +22,9 @@ def read_passport_file(path):
         passports.append(passport)
         return passports
 
+def read_tickets_file():
+    os.path.dirname(__file__)
+    print(read_file("./inputs/day16.txt"))
 
 if __name__ == '__main__':
     # print(read_file("../inputs/day1.txt"))
